@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
-from operator import itemgetter
+from matplotlib import dates, ticker
+from datetime import timedelta,datetime
 
-def finalizefigure(ax,fig):
+
+def finalizefigure(ax,fig,isDate=False):
     legdict = dict(zip(*reversed(ax.get_legend_handles_labels())))
     labels, handles = zip(*[(k,legdict[k]) for k in keys])
     leg = plt.legend(handles, labels
@@ -13,6 +15,11 @@ def finalizefigure(ax,fig):
 
     ax.yaxis.set_ticks(np.arange(len(datasets))+1)
     ax.yaxis.set_ticklabels(('set 1', 'set 2', 'set 3'))
+
+    if isDate:
+      ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M:%S'))
+      ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())    
+      fig.autofmt_xdate()
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.925)
@@ -25,6 +32,7 @@ keys = ('x <= 0.5','0 <= x < 0.2','0.4 <= x < 0.6','0.8 <= x < 1')
 codes = tuple(1 << i for i in range(len(keys)))
 colors = ('#1a9641','#2c7bb6','#d7191c','#fdae61')
 
+t0 = datetime.now()
 datasets = [np.random.rand(100) for i in range(3)]
 
 for i,data in enumerate(datasets):
@@ -39,10 +47,8 @@ for i,data in enumerate(datasets):
     # plot_status(ax,mask,codes,keys,colors=colors,stack=False,yoffset=i)
     # plot_status(ax,mask,codes,keys=keys,colors=colors,yoffset=i
     #             ,stack=[False,True,True,True]
-    #             ,alpha=[0.25,0.9,0.9,0.9],linewidth=0.5)
-    plot_status(ax,mask,codes,keys=keys,colors=colors,yoffset=i
-                ,stack=False
-                ,alpha=[0.25,1,1,1]
-                ,relsize=[1,0.8,0.6,0.4],linewidth=0.5)
-
-finalizefigure(ax,fig)
+    #             ,alpha=[0.25,0.9,0.9,0.9])
+    plot_status(ax, mask, codes, delta=timedelta(seconds=1), xoffset=t0
+                , keys=keys, colors=colors, yoffset=i, stack=False
+                , alpha=[0.25,1,1,1], relsize=[1,0.8,0.6,0.4])
+finalizefigure(ax,fig,isDate=True)

@@ -32,17 +32,9 @@ def mask2runs(mask):
   return runflip[::2],runflip[1::2]
 
 
-def mask2nums(mask, startTime, cadence, timeDenominator, xoffset=0):
-    runstarts, runstops = mask2runs(mask)
-    runstarts = [dates.date2num(timedelta(seconds=(rstart+xoffset)*cadence/timeDenominator)+startTime) for rstart in runstarts]
-    runstops = [dates.date2num(timedelta(seconds=(rstop+xoffset)*cadence/timeDenominator)+startTime) for rstop in runstops]
-
-    return runstarts, runstops
-
-
-def plot_status(ax, data, values, keys=None, times=None, colors=None
+def plot_status(ax, data, values, xoffset=0, delta=1, keys=None, colors=None
                 , alpha=1.0, relsize=1.0, stack=True, vspace=0.05, yoffset=1
-                , linewidth=0.5):
+                , linewidth=0.5, edgecolor='0.5'):
     '''
     plot_status
 
@@ -91,13 +83,18 @@ def plot_status(ax, data, values, keys=None, times=None, colors=None
 
     '''
     if colors is None:
-      colors = tuple(mpl.cm.jet(i/float(len(values))) for i in range(len(values)))
+        colors = tuple(mpl.cm.jet(i/float(len(values))) for i in range(len(values)))
     if keys is None:
-      keys = map(str,values)
+        keys = map(str,values)
 
     if not hasattr(stack,'__iter__'):   stack = [stack]*len(values)
     if not hasattr(alpha,'__iter__'):   alpha = [alpha]*len(values)
     if not hasattr(relsize,'__iter__'): relsize = [relsize]*len(values)
+
+    if isinstance(xoffset,datetime) and isinstance(delta,timedelta):
+        ax.xaxis_date()
+        delta = dates.date2num(xoffset+delta) - dates.date2num(xoffset)
+        xoffset = dates.date2num(xoffset)
 
     j = 0
     barHeight = 1-vspace
@@ -110,9 +107,13 @@ def plot_status(ax, data, values, keys=None, times=None, colors=None
             codeoffset += codeheight*float(j)
             j += 1
 
-        starts, stops = mask2runs(data & v)
+        starts, stops = mask2runs((data & v) == v)
+        starts = np.array(starts)*delta+xoffset
+        stops = np.array(stops)*delta+xoffset
+
         ax.barh([codeoffset]*len(starts), np.subtract(stops,starts), left=starts
                 , height=codeheight, linewidth=0, align='edge'
                 , alpha=a, label=key, color=c)
-    ax.barh(yoffset+1, len(data)
-            ,height=1-vspace,align='center',color="None",edgecolor='0.5', linewidth=linewidth)
+    ax.barh(yoffset+1, len(data)*delta, left=xoffset
+            , height=1-vspace,align='center',color="None"
+            , edgecolor=edgecolor, linewidth=linewidth)
