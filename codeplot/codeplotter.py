@@ -40,8 +40,9 @@ def mask2nums(mask, startTime, cadence, timeDenominator, xoffset=0):
     return runstarts, runstops
 
 
-def plot_status(ax, data, times=None, values=None, colors=None, title=None
-                , alpha=1.0, relsize=1.0, stack=True, barHeight=0.95):
+def plot_status(ax, data, values, keys=None, times=None, colors=None
+                , alpha=1.0, relsize=1.0, stack=True, vspace=0.05, yoffset=1
+                , linewidth=0.5):
     '''
     plot_status
 
@@ -49,17 +50,17 @@ def plot_status(ax, data, times=None, values=None, colors=None, title=None
     matplotlib's barh plot).  Plot style is defined by the keys, values, and
     colors.
 
-    *datadict*
-    Dictionary of dictionary items each containing a 'mask' and 'times' array.
+    *data*
+    Array of code values.
     
     *keys*
-    Text label descriptors for status values.
+    Text label descriptors for code values.
 
     *colors*
-    Distinct colors applied to each status value.
+    Distinct colors applied to each code value.
 
     *values*
-    Distinct integer values corresponding to each status.
+    Distinct integer values corresponding to each code value.
 
     *stack*
     Two ways to set this parameter:    
@@ -91,16 +92,18 @@ def plot_status(ax, data, times=None, values=None, colors=None, title=None
     '''
     if colors is None:
       colors = tuple(mpl.cm.jet(i/float(len(values))) for i in range(len(values)))
+    if keys is None:
+      keys = map(str,values)
 
     if not hasattr(stack,'__iter__'):   stack = [stack]*len(values)
     if not hasattr(alpha,'__iter__'):   alpha = [alpha]*len(values)
     if not hasattr(relsize,'__iter__'): relsize = [relsize]*len(values)
 
-    # plot each status code
     j = 0
-    for k,(s,v,a,scale) in enumerate(zip(stack,values,alpha,relsize)):
+    barHeight = 1-vspace
+    for s,v,a,scale,key,c in zip(stack,values,alpha,relsize,keys,colors):
         codeheight = barHeight*scale
-        codeoffset = 1 - codeheight/2.
+        codeoffset = yoffset+1 - codeheight/2.
 
         if s:
             codeheight /= sum(stack)
@@ -109,5 +112,7 @@ def plot_status(ax, data, times=None, values=None, colors=None, title=None
 
         starts, stops = mask2runs(data & v)
         ax.barh([codeoffset]*len(starts), np.subtract(stops,starts), left=starts
-                    , height=codeheight
-                    , color=colors[k], linewidth=0, align='edge', alpha=a)
+                , height=codeheight, linewidth=0, align='edge'
+                , alpha=a, label=key, color=c)
+    ax.barh(yoffset+1, len(data)
+            ,height=1-vspace,align='center',color="None",edgecolor='0.5', linewidth=linewidth)
