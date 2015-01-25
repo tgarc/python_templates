@@ -40,21 +40,25 @@ colors = ('#2c7bb6','#1a9641','#d7191c','#fdae61')
 t0 = datetime.now()
 datasets = {'PRN%02d'%i:np.random.choice(codes[1:],1000,p=(0.85,0.1,0.05)) for i in range(1,11)}
 
+isDate=False
 for i,prn in enumerate(sorted(datasets)):
     r = np.random.randint(len(datasets[prn]))
     datasets[prn] |= codes[0]
     datasets[prn][r:r+200+np.random.randint(-50,51)] ^= codes[0]
 
+    # Example 1
     # stacked
     # plotmask(ax,datasets[prn],codes,labels=keys,colors=colors,stack=True,yoffset=i)
 
+    # Example 2
     # stack + overlay 
     # plotmask(ax,datasets[prn],codes,labels=keys,colors=colors,yoffset=i
     #          ,stack=[False]+[True]*3, alpha=[0.65]+[0.8]*3)
  
+    # Example 3
+    # isDate = True # use date formatting
     # stack + overlay + relsize + time
-    plotmask(ax, datasets[prn], codes, delta=timedelta(seconds=1), xoffset=t0
-             , labels=keys, colors=colors, yoffset=i, stack=False
-             , alpha=[0.65]+[0.8]*3, relsize=[1]+[0.5]*3, height=0.8)
-finalizefigure(ax,fig,isDate=True)
-fig.savefig('ex3.png',dpi=100)
+    # plotmask(ax, datasets[prn], codes, delta=timedelta(seconds=1), xoffset=t0
+    #          , labels=keys, colors=colors, yoffset=i, stack=False
+    #          , alpha=[0.65]+[0.8]*3, relsize=[1]+[0.5]*3, height=0.8)
+finalizefigure(ax,fig,isDate=isDate)
