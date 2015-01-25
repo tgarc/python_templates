@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
+import matplotlib.pyplot as plt
 from matplotlib import dates, ticker
 from datetime import timedelta,datetime
-from codeplotter import plot_status
-
+from plotmask import plotmask
+import numpy as np
 
 def finalizefigure(ax,fig,isDate=False):
     legdict = dict(zip(*reversed(ax.get_legend_handles_labels())))
@@ -21,7 +22,7 @@ def finalizefigure(ax,fig,isDate=False):
     if isDate:
       ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M:%S'))
       ax.xaxis.set_minor_formatter(dates.DateFormatter(':%M:'))
-      plt.setp(ax.xaxis.get_minorticklabels(),rotation=90)
+      plt.setp(ax.xaxis.get_minorticklabels(),rotation=90,fontsize=9)
       fig.autofmt_xdate()
     
     ax.set_ylim(0.5,len(datasets)+0.5)
@@ -40,26 +41,20 @@ t0 = datetime.now()
 datasets = {'PRN%02d'%i:np.random.choice(codes[1:],1000,p=(0.85,0.1,0.05)) for i in range(1,11)}
 
 for i,prn in enumerate(sorted(datasets)):
+    r = np.random.randint(len(datasets[prn]))
     datasets[prn] |= codes[0]
+    datasets[prn][r:r+200+np.random.randint(-50,51)] ^= codes[0]
 
     # stacked
-    # plot_status(ax,datasets[prn],codes,labels=keys,colors=colors,stack=True,yoffset=i)
-
-    # overlayed & no relsize
-    # plot_status(ax,datasets[prn],codes,labels=keys,colors=colors,stack=False,yoffset=i)
+    # plotmask(ax,datasets[prn],codes,labels=keys,colors=colors,stack=True,yoffset=i)
 
     # stack + overlay 
-    # plot_status(ax,datasets[prn],codes,labels=keys,colors=colors,yoffset=i
-    #             ,stack=[False,True,True,True]
-    #             ,alpha=[0.25,0.9,0.9,0.9])
-
-    # stack + overlay + relsize
-    # plot_status(ax, datasets[prn], codes , labels=keys, colors=colors,
-    #             yoffset=i, stack=False , alpha=[0.65]+[0.9]*3,
-    #             relsize=[1]+[0.9]*3, height=0.9)
-
+    # plotmask(ax,datasets[prn],codes,labels=keys,colors=colors,yoffset=i
+    #          ,stack=[False]+[True]*3, alpha=[0.65]+[0.8]*3)
+ 
     # stack + overlay + relsize + time
-    # plot_status(ax, datasets[prn], codes, delta=timedelta(seconds=1), xoffset=t0
-    #             , labels=keys, colors=colors, yoffset=i, stack=False
-    #             , alpha=[0.65]+[0.9]*3, relsize=[1]+[0.9]*3, height=0.9)
-finalizefigure(ax,fig,isDate=False)
+    plotmask(ax, datasets[prn], codes, delta=timedelta(seconds=1), xoffset=t0
+             , labels=keys, colors=colors, yoffset=i, stack=False
+             , alpha=[0.65]+[0.8]*3, relsize=[1]+[0.5]*3, height=0.8)
+finalizefigure(ax,fig,isDate=True)
+fig.savefig('ex3.png',dpi=100)

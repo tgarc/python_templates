@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -24,7 +22,7 @@ def mask2runs(mask):
 
 
 def plotmask(ax, data, values, xoffset=0, yoffset=1, delta=1, labels=None
-             , colors=None , alpha=1, relsize=1, stack=True , height=0.95
+             , colors=None , alpha=1, relsize=1.0, stack=True , height=0.9
              , linewidth=1, edgecolor='0.5'):
     '''
     plotmask
@@ -59,11 +57,10 @@ def plotmask(ax, data, values, xoffset=0, yoffset=1, delta=1, labels=None
     alpha for each value.
 
     *relsize*
-    Specify scale of horizontal bars relative to *height* (should be <= 1). Can
-    also be specified as an array to set relative height for each value. Using
-    this option together with the *stack* option gives some additional
-    flexibility, allowing for example a dominant underlying status value with a
-    stack of smaller sized status value bars fitting within it.
+    Specify scale of horizontal bars relative to *height* and their allocated
+    area (should be <= 1). Can be specified as an array to set relative height
+    for each value. If stacked, the bar height will be height*relsize/sum(stack)
+    otherwise, bar height will be height*relsize.
     
     *stack*
     Specify whether to vertically stack horizontal bars or allow them to
@@ -75,6 +72,7 @@ def plotmask(ax, data, values, xoffset=0, yoffset=1, delta=1, labels=None
     2)  Alternately, you can specify an array of booleans that determines which
         values are stacked and which aren't. This is useful if you want to allow
         some *values* to overlap.
+
     '''
     if colors is None:
         colors = tuple(mpl.cm.jet(i/float(len(values))) for i in range(len(values)))
@@ -108,5 +106,6 @@ def plotmask(ax, data, values, xoffset=0, yoffset=1, delta=1, labels=None
                 , height=codeheight, linewidth=0, align='edge'
                 , alpha=a, label=l, color=c)
     ax.barh(yoffset+1, len(data)*delta, left=xoffset
-            , height=height,align='center',color="None"
+            , height=height*max(relsize)
+            , align='center', color="None"
             , edgecolor=edgecolor, linewidth=linewidth)
