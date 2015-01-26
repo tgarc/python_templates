@@ -2,7 +2,7 @@
 Classes for writing simple text and latex tables with automatic column width
 calculation.
 
-## Text Example
+### Text Example
 
 ```
 x <= 0.5 | 0 <= x < 0.2 | 0.4 <= x < 0.6 | 0.8 <= x < 1
@@ -39,7 +39,7 @@ table.addRow(*sumrows)
 table.writeTable(out=sys.stdout)
 ```
 
-## Latex Example
+### Latex Example
 
 ```
 \begin{longtable}{|r|r|r|r|}
