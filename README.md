@@ -55,6 +55,7 @@ finalizefigure(ax,fig,isDate=True)
 ```
 
 Output
+
 ![Example](plotmask/ex3.png?raw=true "Example")
 
 ### tables
